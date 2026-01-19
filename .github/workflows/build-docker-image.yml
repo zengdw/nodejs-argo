@@ -32,12 +32,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Generate 8-char Alphanumeric String
+      - name: Generate random lowercase string
         id: random-gen
         run: |
-          # 使用 Python 生成包含字母和数字的 8 位字符串
-          STR=$(python3 -c 'import string, random; print("".join(random.choices(string.ascii_letters + string.digits, k=8)))')
-          echo "id=$STR" >> $GITHUB_OUTPUT
+          # 从随机源中提取小写字母和数字，并截取前 8 位
+          RAND_STR=$(head /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
+          echo "str=$RAND_STR" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
@@ -46,7 +46,7 @@ jobs:
           push: true
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/${{ github.repository_owner }}/${{ steps.random-gen.outputs.id }}:latest
+            ghcr.io/${{ github.repository_owner }}/${{ steps.random-gen.outputs.random_id }}:latest
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.description=HTTP Server
